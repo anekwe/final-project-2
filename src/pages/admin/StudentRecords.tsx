@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { db, Student } from '../../lib/db';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export default function StudentRecords() {
   const [students, setStudents] = useState<Student[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
+  
+  const [errorMsg, setErrorMsg] = useState('');
+  const navigate = useNavigate();
   
   // Validation constraints
   const currentYear = new Date().getFullYear();
@@ -42,23 +46,23 @@ export default function StudentRecords() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     
     // Strict Validation Rule: "Current year only, No past year allowed"
     if (!formData.admission_number.includes(currentYear.toString())) {
-      alert("Validation Error: Admission number must use the CURRENT YEAR (" + currentYear + ")");
+      setErrorMsg("Validation Error: Admission number must use the CURRENT YEAR (" + currentYear + ")");
       return;
     }
 
     // No duplicate number
     if (students.find(s => s.admission_number === formData.admission_number)) {
-      alert("Validation Error: This admission number already exists.");
+      setErrorMsg("Validation Error: This admission number already exists.");
       return;
     }
 
     await db.addStudent(formData);
     setShowForm(false);
     fetchStudents();
-    alert("Student Profile Created Successfully");
   };
 
   const filteredStudents = students.filter(s => 
@@ -69,14 +73,27 @@ export default function StudentRecords() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Student Records</h1>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
-        >
-          <Plus size={18} /> <span>Add Student</span>
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 text-sm">
+        <h1 className="text-2xl flex items-center gap-3 font-bold text-gray-800">
+          <button onClick={() => navigate('/admin')} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-[var(--color-accent-pink)] transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          Student Records
+        </h1>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate('/admin')}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold shadow-sm"
+          >
+            <ArrowLeft size={18} /> <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => { setShowForm(true); setErrorMsg(''); }}
+            className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
+          >
+            <Plus size={18} /> <span>Add Student</span>
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -90,6 +107,11 @@ export default function StudentRecords() {
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {errorMsg && (
+                <div className="p-3 bg-red-50 text-red-600 font-medium rounded-lg text-sm border border-red-100">
+                  {errorMsg}
+                </div>
+              )}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Surname *</label>

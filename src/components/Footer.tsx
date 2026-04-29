@@ -42,7 +42,7 @@ export default function Footer() {
               <li><a href="/#services" className="hover:text-[var(--color-accent-pink)] transition-colors">Our Services</a></li>
               <li><a href="/#news" className="hover:text-[var(--color-accent-pink)] transition-colors">News & Blog</a></li>
               <li><Link to="/apply" className="hover:text-[var(--color-accent-pink)] transition-colors">Apply Now</Link></li>
-              <li><Link to="/admin" className="hover:text-[var(--color-accent-pink)] transition-colors">Admin Portal</Link></li>
+              <li><Link to="/admin/login" className="hover:text-[var(--color-accent-pink)] transition-colors">Admin Portal</Link></li>
             </ul>
           </div>
 

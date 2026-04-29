@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList, LogOut, Menu, X } from 'lucide-react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList, LogOut, Menu, X, Home } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const links = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -67,10 +68,16 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors">
+          <button 
+            onClick={() => {
+              localStorage.removeItem('admin_authenticated');
+              window.location.href = '/';
+            }} 
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors"
+          >
             <LogOut size={20} />
             <span>Logout</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -79,14 +86,23 @@ export default function AdminLayout() {
         
         {/* Top Header */}
         <header className="bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] h-16 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
-          <button 
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-500 hover:text-gray-800"
-          >
-            <Menu size={24} />
-          </button>
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-gray-500 hover:text-gray-800"
+            >
+              <Menu size={24} />
+            </button>
+            <Link to="/" className="hidden sm:flex items-center space-x-2 text-sm font-semibold text-gray-500 hover:text-[var(--color-army-dark)] transition-colors">
+              <Home size={18} /> <span>Back to Website</span>
+            </Link>
+          </div>
           
           <div className="ml-auto flex items-center space-x-4">
+            <Link to="/admin" className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gray-100 text-[var(--color-army-dark)] hover:bg-gray-200 rounded-lg transition-colors font-bold text-sm shadow-sm mr-4">
+              <LayoutDashboard size={18} /> <span>Back to Admin Dashboard</span>
+            </Link>
+            
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-gray-800">Super Admin</p>
               <p className="text-xs text-gray-500">admin@hopexavier.edu</p>

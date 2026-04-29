@@ -272,7 +272,7 @@ export default function Home() {
 
             <div className="bg-white p-8 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-gray-100">
               <h3 className="text-2xl font-bold text-[var(--color-army-dark)] mb-6">Send us a Message</h3>
-              <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); alert("Message sent! (Demo)"); }}>
+              <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); e.currentTarget.reset(); }}>
                 <div className="grid grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>

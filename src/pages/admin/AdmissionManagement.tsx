@@ -23,17 +23,15 @@ export default function AdmissionManagement() {
   }, []);
 
   const handleStatusUpdate = async (id: string, status: 'Accepted' | 'Rejected', applicantName: string) => {
-    if (window.confirm(`Are you sure you want to ${status.toLowerCase()} ${applicantName}?`)) {
-      await db.updateApplicationStatus(id, status);
-      
-      if (status === 'Accepted') {
-        setModalMessage(`Application for ${applicantName} has been ACCEPTED. Acceptance messages sent via Email and WhatsApp.`);
-      } else {
-        setModalMessage(`Application for ${applicantName} has been REJECTED.`);
-      }
-      setShowModal(true);
-      fetchApps();
+    await db.updateApplicationStatus(id, status);
+    
+    if (status === 'Accepted') {
+      setModalMessage(`Application for ${applicantName} has been ACCEPTED. Acceptance messages sent via Email and WhatsApp.`);
+    } else {
+      setModalMessage(`Application for ${applicantName} has been REJECTED.`);
     }
+    setShowModal(true);
+    fetchApps();
   };
 
   const handleOkClick = () => {
@@ -42,10 +40,8 @@ export default function AdmissionManagement() {
   };
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all applications? This will clear all submitted applications and restore the demo data.')) {
-      localStorage.removeItem('applications');
-      window.location.reload();
-    }
+    localStorage.removeItem('applications');
+    window.location.reload();
   };
 
   const pendingApps = applications.filter(a => a.status === 'Pending');
@@ -75,9 +71,17 @@ export default function AdmissionManagement() {
         </div>
       )}
 
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Admission Management</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 text-sm">
+        <h1 className="text-2xl flex items-center gap-3 font-bold text-gray-800">
+          <button onClick={() => navigate('/admin')} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-[var(--color-accent-pink)] transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          Admission Management
+        </h1>
         <div className="flex space-x-2 text-sm">
+          <button onClick={() => navigate('/admin')} className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+            <ArrowLeft size={16} /> <span>Dashboard</span>
+          </button>
           <button className="flex items-center space-x-1 px-3 py-1.5 bg-white border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors">
             <Printer size={16} /> <span>Print</span>
           </button>

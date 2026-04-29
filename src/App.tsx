@@ -14,6 +14,8 @@ import AdmissionManagement from './pages/admin/AdmissionManagement';
 import StudentRecords from './pages/admin/StudentRecords';
 import StaffRecords from './pages/admin/StaffRecords';
 import NewsManagement from './pages/admin/NewsManagement';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminLogin from './pages/admin/AdminLogin';
 
 export default function App() {
   return (
@@ -26,8 +28,14 @@ export default function App() {
           <Route path="results" element={<ResultChecker />} />
         </Route>
 
+        <Route path="/admin/login" element={<AdminLogin />} />
+
         {/* Backend Admin Portal */}
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route index element={<AdminDashboard />} />
           <Route path="admissions" element={<AdmissionManagement />} />
           <Route path="students" element={<StudentRecords />} />

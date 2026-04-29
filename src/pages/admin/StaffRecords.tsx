@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { db, Staff } from '../../lib/db';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function StaffRecords() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     surname: '',
@@ -36,7 +38,6 @@ export default function StaffRecords() {
     await db.addStaff(formData);
     setShowForm(false);
     fetchStaff();
-    alert("Staff Record Created Successfully");
     setFormData({
       surname: '', first_name: '', last_name: '', gender: 'Male',
       email_address: '', home_address: '', qualification: '', state: ''
@@ -50,14 +51,27 @@ export default function StaffRecords() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Staff Records</h1>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
-        >
-          <Plus size={18} /> <span>Add Staff</span>
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 text-sm">
+        <h1 className="text-2xl flex items-center gap-3 font-bold text-gray-800">
+          <button onClick={() => navigate('/admin')} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-[var(--color-accent-pink)] transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          Staff Records
+        </h1>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate('/admin')}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold shadow-sm"
+          >
+            <ArrowLeft size={18} /> <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => setShowForm(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
+          >
+            <Plus size={18} /> <span>Add Staff</span>
+          </button>
+        </div>
       </div>
 
       {showForm && (

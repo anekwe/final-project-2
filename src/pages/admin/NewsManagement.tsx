@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, NewsBlog } from '../../lib/db';
-import { Plus, X, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Plus, X, Trash2, Link as LinkIcon, Upload, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export default function NewsManagement() {
   const [news, setNews] = useState<NewsBlog[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -27,32 +30,82 @@ export default function NewsManagement() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with 0.7 quality
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setFormData({ ...formData, image_url: compressedDataUrl });
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await db.addNews(formData);
     setShowForm(false);
     fetchNews();
-    alert("Post published successfully");
     setFormData({ title: '', content: '', author: 'Admin', image_url: '' });
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
-      await db.deleteNews(id);
-      fetchNews();
-    }
+    await db.deleteNews(id);
+    fetchNews();
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">News & Blog Manager</h1>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
-        >
-          <Plus size={18} /> <span>Create Post</span>
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 text-sm">
+        <h1 className="text-2xl flex items-center gap-3 font-bold text-gray-800">
+          <button onClick={() => navigate('/admin')} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-[var(--color-accent-pink)] transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          News & Blog Manager
+        </h1>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate('/admin')}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold shadow-sm"
+          >
+            <ArrowLeft size={18} /> <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => setShowForm(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-[var(--color-army-dark)] text-white rounded-lg hover:bg-[var(--color-army-base)] transition-colors font-semibold shadow-sm"
+          >
+            <Plus size={18} /> <span>Create Post</span>
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -79,10 +132,32 @@ export default function NewsManagement() {
                   <input type="text" name="author" value={formData.author} onChange={handleChange} required className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--color-army-base)]" />
                </div>
                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image URL</label>
-                  <div className="relative">
-                    <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                    <input type="url" name="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://..." className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--color-army-base)]" />
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image</label>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex space-x-2">
+                      <div className="relative flex-1">
+                        <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                        <input type="url" name="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://... OR Upload image" className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--color-army-base)]" />
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center text-gray-700 font-semibold"
+                        title="Upload Image"
+                      >
+                        <Upload size={20} />
+                      </button>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange}
+                      />
+                    </div>
+                    {formData.image_url && formData.image_url.startsWith('data:image') && (
+                      <div className="text-xs text-green-600 font-medium">Image uploaded successfully</div>
+                    )}
                   </div>
                </div>
             </div>
@@ -93,6 +168,7 @@ export default function NewsManagement() {
           </form>
         </div>
       )}
+
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {news.length === 0 && !showForm && (

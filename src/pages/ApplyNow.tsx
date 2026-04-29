@@ -32,12 +32,6 @@ export default function ApplyNow() {
       await db.addApplication(formData);
       
       setSuccess(true);
-      
-      // Simulate notifications
-      setTimeout(() => {
-        alert("SIMULATION:\n\n1. Admin received alert.\n2. Parent Got Email Notification.\n3. WhatsApp Notification Sent to " + formData.phone);
-      }, 500);
-
     } catch (err) {
       setError('An error occurred during submission. Please try again.');
     } finally {
